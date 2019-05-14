@@ -1,7 +1,7 @@
-const utils = {};
+const transform = require('./transform');
 
-utils.add = function (a, b) {
-  return a + b;
+const utils = {
+  transform,
 };
 
 module.exports = utils;
