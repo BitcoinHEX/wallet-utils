@@ -1,0 +1,1 @@
+const hexUtils = require('../index');
