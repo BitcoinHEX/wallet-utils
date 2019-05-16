@@ -13,6 +13,26 @@ const provider = ethers.getDefaultProvider();
 
 const contract = new ethers.Contract(contractAddress, abi, provider);
 
+const callConstant = () => {
+
+};
+
+const callActive = () => {
+
+};
+
+const simulateCall = () => {
+
+};
+
+const subscribe = (event, callback) => {
+  contract.on(event, callback);
+};
+
 module.exports = {
   contract,
+  callConstant,
+  callActive,
+  simulateCall,
+  subscribe,
 };
