@@ -12,9 +12,9 @@ Architecture:
   - Return in format:
 ```json
 {
-  call: {"params passed to contract"},
-  result: {"simulated contract output"},
-  submit: function("Send transaction on-chain")
+  "call": {"params passed to contract"},
+  "result": {"simulated contract output"},
+  "submit": {"function sendTransactionOnChain()"}
 }
 ```
 
