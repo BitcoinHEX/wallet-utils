@@ -22,7 +22,7 @@ const callActive = () => {
 };
 
 const simulateCall = () => {
-
+  // Use callConstant to simulate call: https://ethereum.stackexchange.com/questions/765/what-is-the-difference-between-a-transaction-and-a-call
 };
 
 const subscribe = (event, callback) => {
