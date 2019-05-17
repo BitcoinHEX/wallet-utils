@@ -1,40 +1,36 @@
 const ethers = require('ethers');
 
-const contractAddress = '0x2bD9aAa2953F988153c8629926D22A6a5F69b14E';
+class Dispatcher {
+  constructor(contractAddress, network) {
+    const abi = [
+      'event ValueChanged(address indexed author, string oldValue, string newValue)',
+      'constructor(string value)',
+      'function getValue() view returns (string value)',
+      'function setValue(string value)',
+    ];
 
-const abi = [
-  'event ValueChanged(address indexed author, string oldValue, string newValue)',
-  'constructor(string value)',
-  'function getValue() view returns (string value)',
-  'function setValue(string value)',
-];
+    const provider = ethers.getDefaultProvider(network);
 
-const provider = ethers.getDefaultProvider();
+    this.contract = new ethers.Contract(contractAddress, abi, provider);
+  }
 
-const contract = new ethers.Contract(contractAddress, abi, provider);
+  callConstant(method, arguments) {
 
-const callConstant = () => {
+  }
 
-};
+  callActive(method, arguments) {
 
-const callActive = () => {
+  }
 
-};
+  simulateCall(method, arguments) {
+    // Use callConstant to simulate call
+    // https://github.com/ethereum/interfaces/issues/8
+    // https://ethereum.stackexchange.com/questions/765/what-is-the-difference-between-a-transaction-and-a-call
+  }
 
-const simulateCall = () => {
-  // Use callConstant to simulate call
-  // https://github.com/ethereum/interfaces/issues/8
-  // https://ethereum.stackexchange.com/questions/765/what-is-the-difference-between-a-transaction-and-a-call
-};
+  subscribe(event, callback) {
+    this.contract.on(event, callback);
+  }
+}
 
-const subscribe = (event, callback) => {
-  contract.on(event, callback);
-};
-
-module.exports = {
-  contract,
-  callConstant,
-  callActive,
-  simulateCall,
-  subscribe,
-};
+module.exports = Dispatcher;
