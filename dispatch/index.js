@@ -11,7 +11,7 @@ class Dispatcher {
 
     this.provider = ethers.getDefaultProvider(network);
 
-    this.contract = new ethers.Contract(contractAddress, abi, provider);
+    this.contract = new ethers.Contract(contractAddress, abi, this.provider);
     this.simulator = contractSimulator;
   }
 
