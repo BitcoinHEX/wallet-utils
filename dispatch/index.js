@@ -1,7 +1,7 @@
 const ethers = require('ethers');
 
 class Dispatcher {
-  constructor(contractAddress, network) {
+  constructor(contractAddress, network, contractSimulator) {
     const abi = [
       'event ValueChanged(address indexed author, string oldValue, string newValue)',
       'constructor(string value)',
@@ -9,20 +9,46 @@ class Dispatcher {
       'function setValue(string value)',
     ];
 
-    const provider = ethers.getDefaultProvider(network);
+    this.provider = ethers.getDefaultProvider(network);
 
-    this.contract = new ethers.Contract(contractAddress, abi, provider);
+    this.contract = new ethers.Contract(contractAddress, abi, this.provider);
+    this.simulator = contractSimulator;
   }
 
-  callConstant(method, arguments) {
+  doStuff(method, args){
+      const contractFunction = this.contract.interface.functions[method];
+      let simFunction;
+      let gasCost;
+      if(contractFunction.type === 'call'){
+          simFunction = this.provider.call;
+          gasCost = () => Promise.resolve(ethers.utils.bigNumberify(0));
+      } else {
+          simFunction = () => this.simulator[method](args); // ignore tx data, use raw args for ease
+          gasCost = this.provider.estimateGas;
+      }
 
+      const tx = {
+          to: this.contract.address,
+          nonce: 0,
+          gasLimit: 0,
+          gasPrice: 0,
+          data: contractFunction.encode(args),
+      };
+
+      return {
+          callData: args,
+          transaction: tx,
+          getGasCost: () => gasCost(tx),
+          simulate: () => simFunction(tx),
+          submit: wallet => this.contract.connect(wallet)[method](args),
+      };
   }
 
-  callActive(method, arguments) {
+  callConstant(method, args) {}
 
-  }
+  callActive(method, args) {}
 
-  simulateCall(method, arguments) {
+  simulateCall(method, args) {
     // Use callConstant to simulate call
     // https://github.com/ethereum/interfaces/issues/8
     // https://ethereum.stackexchange.com/questions/765/what-is-the-difference-between-a-transaction-and-a-call
