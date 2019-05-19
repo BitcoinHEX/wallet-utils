@@ -1,7 +1,7 @@
 const ethers = require('ethers');
 
 class Dispatcher {
-  constructor(contractAddress, network) {
+  constructor(contractAddress, network, contractSimulator) {
     const abi = [
       'event ValueChanged(address indexed author, string oldValue, string newValue)',
       'constructor(string value)',
@@ -12,15 +12,19 @@ class Dispatcher {
     this.provider = ethers.getDefaultProvider(network);
 
     this.contract = new ethers.Contract(contractAddress, abi, provider);
+    this.simulator = contractSimulator;
   }
 
   doStuff(method, args){
       const contractFunction = this.contract.interface.functions[method];
       let simFunction;
+      let gasCost;
       if(contractFunction.type === 'call'){
           simFunction = this.provider.call;
+          gasCost = () => Promise.resolve(ethers.utils.bigNumberify(0));
       } else {
-          simFunction = this.provider.estimateGas;
+          simFunction = () => this.simulator[method](args); // ignore tx data, use raw args for ease
+          gasCost = this.provider.estimateGas;
       }
 
       const tx = {
@@ -34,8 +38,9 @@ class Dispatcher {
       return {
           callData: args,
           transaction: tx,
+          getGasCost: () => gasCost(tx),
           simulate: () => simFunction(tx),
-          submit: (wallet) => this.contract.connect(wallet)[method](args),
+          submit: wallet => this.contract.connect(wallet)[method](args),
       };
   }
 
