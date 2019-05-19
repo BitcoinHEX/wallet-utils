@@ -9,20 +9,41 @@ class Dispatcher {
       'function setValue(string value)',
     ];
 
-    const provider = ethers.getDefaultProvider(network);
+    this.provider = ethers.getDefaultProvider(network);
 
     this.contract = new ethers.Contract(contractAddress, abi, provider);
   }
 
-  callConstant(method, arguments) {
+  doStuff(method, args){
+      const contractFunction = this.contract.interface.functions[method];
+      let simFunction;
+      if(contractFunction.type === 'call'){
+          simFunction = this.provider.call;
+      } else {
+          simFunction = this.provider.estimateGas;
+      }
 
+      const tx = {
+          to: this.contract.address,
+          nonce: 0,
+          gasLimit: 0,
+          gasPrice: 0,
+          data: contractFunction.encode(args),
+      };
+
+      return {
+          callData: args,
+          transaction: tx,
+          simulate: () => simFunction(tx),
+          submit: (wallet) => this.contract.connect(wallet)[method](args),
+      };
   }
 
-  callActive(method, arguments) {
+  callConstant(method, args) {}
 
-  }
+  callActive(method, args) {}
 
-  simulateCall(method, arguments) {
+  simulateCall(method, args) {
     // Use callConstant to simulate call
     // https://github.com/ethereum/interfaces/issues/8
     // https://ethereum.stackexchange.com/questions/765/what-is-the-difference-between-a-transaction-and-a-call
