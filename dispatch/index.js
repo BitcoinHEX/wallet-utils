@@ -15,7 +15,7 @@ class Dispatcher {
     this.simulator = contractSimulator;
   }
 
-  doStuff(method, args){
+  buildProxy(method, args){
       const contractFunction = this.contract.interface.functions[method];
       let simFunction;
       let gasCost;
@@ -44,14 +44,32 @@ class Dispatcher {
       };
   }
 
-  callConstant(method, args) {}
+  callConstant(method, args) {
+      const contractFunction = this.contract.interface.functions[method];
+      if(contractFunction.type !== 'call'){
+          return Promise.reject(new Error('method ' + method + ' is not `call` type.'));
+      }
 
-  callActive(method, args) {}
+      const tx = {
+          to: this.contract.address,
+          nonce: 0,
+          gasLimit: 0,
+          gasPrice: 0,
+          data: contractFunction.encode(args),
+      };
+
+      return this.provider.call(tx);
+  }
+
+  callActive(method, args, wallet) {
+      this.buildProxy(method, args).submit(wallet);
+  }
 
   simulateCall(method, args) {
     // Use callConstant to simulate call
     // https://github.com/ethereum/interfaces/issues/8
     // https://ethereum.stackexchange.com/questions/765/what-is-the-difference-between-a-transaction-and-a-call
+      return this.buildProxy(method, args).simulate();
   }
 
   subscribe(event, callback) {

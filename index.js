@@ -5,12 +5,13 @@ const transform = require('./transform');
 const Dispatch = require('./dispatch');
 
 class Utils {
-  constructor(contractAddress, network) {
+  constructor(contractAddress, network, contractStartDateMillis) {
     this.claim = claim;
-    this.token = token;
+    this.token = token(contractStartDateMillis);
     this.stake = stake;
     this.transform = transform;
-    this.dispatch = new Dispatch(contractAddress, network);
+    const simulator = Object.assign({}, this.claim, this.token, this.stake, this.transform);
+    this.dispatch = new Dispatch(contractAddress, network, simulator);
   }
 }
 
