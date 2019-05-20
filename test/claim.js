@@ -1,10 +1,169 @@
 const assert = require('assert');
-const hexUtils = require('../index');
+const ethers = require('ethers');
+const Claim = require('../claim');
 
 describe('claim', () => {
   describe('getClaimStatement()', () => {
     it('shold return the correct claim statement', () => {
-      assert.equal(hexUtils.claim.getClaimStatement('0x3f5CE5FBFe3E9af3971dD833D26bA9b5C936f0bE'), 'Claim_HEX_to_0x3f5CE5FBFe3E9af3971dD833D26bA9b5C936f0bE');
+      assert.strictEqual(new Claim(Date.now()).getClaimStatement('0x3f5CE5FBFe3E9af3971dD833D26bA9b5C936f0bE'), 'Claim_HEX_to_0x3f5CE5FBFe3E9af3971dD833D26bA9b5C936f0bE');
+    });
+  });
+
+  describe('claimBtcAddress', () => {
+    it('should return 20% bonus hearts for launch day', () => {
+      const hearts = new Claim(Date.now())
+          .claimBtcAddress(100,
+                           null,
+                           '0x3f5CE5FBFe3E9af3971dD833D26bA9b5C936f0bE',
+                           null,
+                           null,
+                           null,
+                           null,
+                           null,
+                           null,
+                           350,
+                           null);
+      console.log(hearts.toString());
+
+      // 1.2 (speed) * input * 10,000 (hearts/satoshi) = 1,200,000
+      assert.strict(ethers.utils.bigNumberify(1200000).eq(hearts));
+    });
+
+    it('should return 50% hearts for launch day minor whale', () => {
+        const hearts = new Claim(Date.now())
+            .claimBtcAddress(1000e8,
+                null,
+                '0x3f5CE5FBFe3E9af3971dD833D26bA9b5C936f0bE',
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                350,
+                null);
+        console.log(hearts.toString());
+
+        // 1.2 (speed) * input * 10,000 (hearts/satoshi) * 0.5 (whale) = 1,200,000
+        assert.strict(ethers.utils.bigNumberify(600000000000000).eq(hearts));
+    });
+
+    it('should return 25% hearts for launch day major whale', () => {
+        const hearts = new Claim(Date.now())
+            .claimBtcAddress(1e5 * 1e8,
+                null,
+                '0x3f5CE5FBFe3E9af3971dD833D26bA9b5C936f0bE',
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                350,
+                null);
+        console.log(hearts.toString());
+
+        // 1.2 (speed) * input * 10,000 (hearts/satoshi) * 0.25 (whale)= 1,200,000
+        assert.strict(ethers.utils.bigNumberify('30000000000000000').eq(hearts));
+    });
+
+    it('should return 32% bonus hearts for non-self refer launch day', () => {
+        const hearts = new Claim(Date.now())
+            .claimBtcAddress(100,
+                null,
+                '0x3f5CE5FBFe3E9af3971dD833D26bA9b5C936f0bE',
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                350,
+                '0x1a5CE5FBFe3E9af3971dD833D26bA9b5C936f0aa');
+        console.log(hearts.toString());
+
+
+        // 1.2 (speed) * input * 10,000 (hearts/satoshi) * 1.3 (self-ref) = 1,560,000
+        assert.strict(ethers.utils.bigNumberify(1320000).eq(hearts));
+    });
+
+    it('should return 56% bonus hearts for self refer launch day', () => {
+        const hearts = new Claim(Date.now())
+            .claimBtcAddress(100,
+                null,
+                '0x3f5CE5FBFe3E9af3971dD833D26bA9b5C936f0bE',
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                350,
+                '0x3f5CE5FBFe3E9af3971dD833D26bA9b5C936f0bE');
+        console.log(hearts.toString());
+
+
+        // 1.2 (speed) * input * 10,000 (hearts/satoshi) * 1.3 (self-ref) = 1,560,000
+        assert.strict(ethers.utils.bigNumberify(1560000).eq(hearts));
+    });
+
+    it('should return <100%  hearts for half-way day', () => {
+        const hearts = new Claim(Date.now() - (176 * 1000 * 86400))
+            .claimBtcAddress(100,
+                null,
+                '0x3f5CE5FBFe3E9af3971dD833D26bA9b5C936f0bE',
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                350,
+                null);
+        console.log(hearts.toString());
+
+        // 0.5 (late) * (1 + 174/(5*350)) (speed) * input * 10,000 (hearts/satoshi) = 549,714
+        assert.strict(ethers.utils.bigNumberify(549714).eq(hearts));
+    });
+
+    it('should return <100% hearts for non-self refer launch day', () => {
+        const hearts = new Claim(Date.now() - (176 * 1000 * 86400))
+            .claimBtcAddress(100,
+                null,
+                '0x3f5CE5FBFe3E9af3971dD833D26bA9b5C936f0bE',
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                350,
+                '0x1a5CE5FBFe3E9af3971dD833D26bA9b5C936f0aa');
+        console.log(hearts.toString());
+
+
+        // 0.5 (late) * (1 + 174/(5*350)) (speed) * input * 10,000 (hearts/satoshi) * 1.1 (other-ref) = 604,685
+        assert.strict(ethers.utils.bigNumberify(604685).eq(hearts));
+    });
+
+    it('should return <100% hearts for self refer launch day', () => {
+        const hearts = new Claim(Date.now() - (176 * 1000 * 86400))
+            .claimBtcAddress(100,
+                null,
+                '0x3f5CE5FBFe3E9af3971dD833D26bA9b5C936f0bE',
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                350,
+                '0x3f5CE5FBFe3E9af3971dD833D26bA9b5C936f0bE');
+        console.log(hearts.toString());
+
+
+        // 0.5 (late) * (1 + 174/(5*350)) (speed) * input * 10,000 (hearts/satoshi) * 1.3 (self-ref) = 714,627 (round down)
+        assert.strict(ethers.utils.bigNumberify(714627).eq(hearts));
     });
   });
 });

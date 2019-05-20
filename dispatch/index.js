@@ -1,7 +1,7 @@
 const ethers = require('ethers');
 
 class Dispatcher {
-  constructor(contractAddress, network, contractSimulator) {
+  constructor(contractAddress, networkProvider, contractSimulator) {
     const abi = [
       'event ValueChanged(address indexed author, string oldValue, string newValue)',
       'constructor(string value)',
@@ -9,7 +9,7 @@ class Dispatcher {
       'function setValue(string value)',
     ];
 
-    this.provider = ethers.getDefaultProvider(network);
+    this.provider = networkProvider;
 
     this.contract = new ethers.Contract(contractAddress, abi, this.provider);
     this.simulator = contractSimulator;

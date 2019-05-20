@@ -1,17 +1,20 @@
-const claim = require('./claim');
-const token = require('./token');
-const stake = require('./stake');
-const transform = require('./transform');
+const ethers = require('ethers');
+const Claim = require('./claim');
+const Token = require('./token');
+const Stake = require('./stake');
+const Transform = require('./transform');
 const Dispatch = require('./dispatch');
 
 class Utils {
-  constructor(contractAddress, network, contractStartDateMillis) {
-    this.claim = claim;
-    this.token = token(contractStartDateMillis);
-    this.stake = stake;
-    this.transform = transform;
+  constructor(contractAddress, contractStartDateMillis, network, networkProvider) {
+    this.claim = new Claim(contractStartDateMillis);
+    this.token = new Token(contractStartDateMillis);
+    this.stake = new Stake(contractStartDateMillis);
+    this.transform = new Transform(contractStartDateMillis);
     const simulator = Object.assign({}, this.claim, this.token, this.stake, this.transform);
-    this.dispatch = new Dispatch(contractAddress, network, simulator);
+
+    const np = networkProvider || ethers.getDefaultProvider(network);
+    this.dispatch = new Dispatch(contractAddress, np, simulator);
   }
 }
 

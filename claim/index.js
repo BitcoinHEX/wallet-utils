@@ -1,65 +1,76 @@
 const ethers = require('ethers');
-const tokenFunctions = require('../token');
+const Token = require('../token');
 
 const CLAIM_REWARD_DAYS = 350;
 const HEARTS_PER_SATOSHI = 1e4;
 
 function adjustSillyWhale(rawSatoshis){
+    const asBig = ethers.utils.bigNumberify(rawSatoshis);
     if (rawSatoshis < 1000e8) {
         /* For < 1,000 BTC: no penalty */
-        return rawSatoshis;
+        return asBig;
     }
     if (rawSatoshis >= 10000e8) {
         /* For >= 10,000 BTC: penalty is 75%, leaving 25% */
-        return rawSatoshis / 4;
+        return asBig.div(4);
     }
-    return rawSatoshis * (19000e8 - rawSatoshis) / 36000e8;
+    return asBig.mul((19000e8 - asBig)).div(36000e8);
 }
 
-const claim = {
+class Claim {
+    _startTimeMillis;
+    _token;
 
-  getClaimStatement: ethAddress => `Claim_HEX_to_${ethAddress}`,
-  claimBtcAddress: (
-      rawSatoshis,
-      proof, // UInt8Array not used
-      claimToAddr, // address, present only
-      pubKeyX, // UInt8Array not used
-      pubKeyY, // UInt8Array not used
-      addrType, //byte not used
-      v, // byte not used
-      r, // UInt8Array not used
-      s, // UInt8Array not used
-      autoStakeDays, // not used
-      referrerAddr, // address, present only
-      ) => {
-          const day = tokenFunctions.getCurrentDay();
+    constructor(contractStartDateMillis){
+      this._startTimeMillis = contractStartDateMillis;
+      this._token = new Token(contractStartDateMillis);
+    }
 
-          let adjSatoshis = adjustSillyWhale(rawSatoshis);
-          const phaseDaysRemaining = CLAIM_REWARD_DAYS - day;
-          const rewardDaysRemaining = phaseDaysRemaining < CLAIM_REWARD_DAYS
-              ? phaseDaysRemaining + 1
-              : CLAIM_REWARD_DAYS;
+    getClaimStatement(ethAddress) {
+        return `Claim_HEX_to_${ethAddress}`;
+    }
 
-          //late claim
-          adjSatoshis *= rewardDaysRemaining / CLAIM_REWARD_DAYS;
+    claimBtcAddress(
+            rawSatoshis,
+            proof, // UInt8Array not used
+            claimToAddr, // address, present only
+            pubKeyX, // UInt8Array not used
+            pubKeyY, // UInt8Array not used
+            addrType, // byte not used
+            v, // byte not used
+            r, // UInt8Array not used
+            s, // UInt8Array not used
+            autoStakeDays, // not used
+            referrerAddr, // address, present only
+    ){
+        const day = this._token.getCurrentDay();
 
-          let claimedHearts = adjSatoshis * HEARTS_PER_SATOSHI;
+        let adjSatoshis = adjustSillyWhale(rawSatoshis);
+        const phaseDaysRemaining = CLAIM_REWARD_DAYS - day;
+        const rewardDaysRemaining = phaseDaysRemaining < CLAIM_REWARD_DAYS
+            ? phaseDaysRemaining + 1
+            : CLAIM_REWARD_DAYS;
 
-          //speed bonus
-          claimedHearts += claimedHearts * phaseDaysRemaining / (CLAIM_REWARD_DAYS * 5);
+        // late claim
+        adjSatoshis = adjSatoshis.mul(rewardDaysRemaining).div(CLAIM_REWARD_DAYS);
 
-          // referral
-          if(referrerAddr){
+        let claimedHearts = adjSatoshis.mul(HEARTS_PER_SATOSHI);
+
+        // speed bonus
+        claimedHearts = claimedHearts.add(claimedHearts.mul(phaseDaysRemaining).div(CLAIM_REWARD_DAYS * 5));
+
+        // referral
+        if (referrerAddr) {
             // 10% for using referral link
-            const referralBonus = claimedHearts / 10;
-            claimedHearts += referralBonus;
-            if(referrerAddr === claimToAddr) {
-              // self refer gets the other 20%
-              claimedHearts += referralBonus + referralBonus;
+            const referralBonus = claimedHearts.div(10);
+            claimedHearts = claimedHearts.add(referralBonus);
+            if (referrerAddr === claimToAddr) {
+                // self refer gets the other 20%
+                claimedHearts = claimedHearts.add(referralBonus).add(referralBonus);
             }
-          }
-          return Promise.resolve(ethers.utils.bigNumberify(claimedHearts));
-  },
+        }
+        return claimedHearts;
+    }
 };
 
-module.exports = claim;
+module.exports = Claim;

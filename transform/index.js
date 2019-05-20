@@ -1,4 +1,10 @@
-const transform = {
+class Transform {
+    _startTimeMillis;
+
+    constructor(contractStartTimeMillis){
+        this._startTimeMillis = contractStartTimeMillis;
+    }
+
 };
 
-module.exports = transform;
+module.exports = Transform;
