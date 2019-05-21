@@ -1,10 +1,7 @@
 class Transform {
-    _startTimeMillis;
-
-    constructor(contractStartTimeMillis){
-        this._startTimeMillis = contractStartTimeMillis;
-    }
-
-};
+  constructor(contractStartTimeMillis) {
+    this.startTimeMillis = contractStartTimeMillis;
+  }
+}
 
 module.exports = Transform;
