@@ -1,5 +1,4 @@
 const ethers = require('ethers');
-const Token = require('../token');
 
 const MIN_AUTO_STAKE_DAYS = 350;
 const LATE_PENALTY_GRACE_DAYS = 14;
@@ -136,22 +135,8 @@ function calcStakeReturn(dailyData, st, servedDays) {
 }
 
 class Stake {
-  constructor(contractStartTimeMillis) {
-    this.token = new Token(contractStartTimeMillis);
-    this.currentStakes = [];
-    this.dailyPayoutData = [];
-  }
-
-  updateStakes(newStakeList) {
-    this.currentStakes = newStakeList;
-  }
-
-  addStake(newStake) {
-    this.currentStakes.push(newStake);
-  }
-
-  updateDailyPayoutData(newDailyPayoutData) {
-    this.dailyPayoutData = newDailyPayoutData;
+  constructor(contractState) {
+    this.contractState = contractState;
   }
 
   // startStake(newStakedHearts, newStakedDays){} - not useful to simulate?
@@ -159,21 +144,21 @@ class Stake {
   // goodAccounting(stakerAddr, stakeIndex, stakeIdParam){} - not useful to simulate?
 
   endStake(stakeIndex, stakeIdParam) {
-    if (this.currentStakes.length === 0) {
+    if (this.contractState.getCurrentStakes().length === 0) {
       throw new Error('HEX: Empty stake list');
     }
-    if (stakeIndex >= this.currentStakes.length) {
+    if (stakeIndex >= this.contractState.getCurrentStakes().length) {
       throw new Error('HEX: stakeIndex invalid');
     }
 
     /* Get stake copy */
-    const st = this.currentStakes[stakeIndex];
+    const st = this.contractState.getCurrentStakes()[stakeIndex];
     if (stakeIdParam !== st.stakeId) {
       throw new Error('HEX: stakeIdParam not in stake');
     }
 
     let servedDays = 0;
-    const currentDay = this.token.getCurrentDay();
+    const currentDay = this.contractState.getCurrentDay();
     const prevUnpooled = (st.unpooledDay !== 0);
     let stakeReturn = bigZero;
 
@@ -193,25 +178,13 @@ class Stake {
         }
       }
 
-      stakeReturn = calcStakeReturn(this.dailyPayoutData,
+      stakeReturn = calcStakeReturn(this.contractState.getDailyPayoutData(),
         st, servedDays);
     } else {
       stakeReturn = st.stakedHearts;
     }
 
-    // remove stake from the list in the same way the contract does
-    const lastIndex = this.currentStakes.length - 1;
-
-    /* Skip the copy if element to be removed is already the last element */
-    if (stakeIndex !== lastIndex) {
-      /* Copy last element to the requested element's "hole" */
-      this.currentStakes[stakeIndex] = this.currentStakes[lastIndex];
-    }
-
-    /*
-            Reduce the array length now that the array is contiguous.
-        */
-    this.currentStakes.pop();
+    this.contractState.removeStake(stakeIndex);
 
     return stakeReturn;
   }

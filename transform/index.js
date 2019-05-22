@@ -1,6 +1,6 @@
 class Transform {
-  constructor(contractStartTimeMillis) {
-    this.startTimeMillis = contractStartTimeMillis;
+  constructor(contractState) {
+    this.contractState = contractState;
   }
 }
 

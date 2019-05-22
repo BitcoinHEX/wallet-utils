@@ -1,6 +1,7 @@
 const assert = require('assert');
 const ethers = require('ethers');
 const Claim = require('../claim');
+const Utils = require('./testUtilities');
 
 describe('claim', () => {
   describe('getClaimStatement()', () => {
@@ -11,7 +12,7 @@ describe('claim', () => {
 
   describe('claimBtcAddress', () => {
     it('should return 20% bonus hearts for launch day', () => {
-      const hearts = new Claim(Date.now())
+      const hearts = new Claim(Utils.newState())
         .claimBtcAddress(100,
           null,
           '0x3f5CE5FBFe3E9af3971dD833D26bA9b5C936f0bE',
@@ -30,7 +31,7 @@ describe('claim', () => {
     });
 
     it('should return 50% hearts for launch day minor whale', () => {
-      const hearts = new Claim(Date.now())
+      const hearts = new Claim(Utils.newState())
         .claimBtcAddress(1000e8,
           null,
           '0x3f5CE5FBFe3E9af3971dD833D26bA9b5C936f0bE',
@@ -49,7 +50,7 @@ describe('claim', () => {
     });
 
     it('should return 25% hearts for launch day major whale', () => {
-      const hearts = new Claim(Date.now())
+      const hearts = new Claim(Utils.newState())
         .claimBtcAddress(1e5 * 1e8,
           null,
           '0x3f5CE5FBFe3E9af3971dD833D26bA9b5C936f0bE',
@@ -68,7 +69,7 @@ describe('claim', () => {
     });
 
     it('should return 32% bonus hearts for non-self refer launch day', () => {
-      const hearts = new Claim(Date.now())
+      const hearts = new Claim(Utils.newState())
         .claimBtcAddress(100,
           null,
           '0x3f5CE5FBFe3E9af3971dD833D26bA9b5C936f0bE',
@@ -88,7 +89,7 @@ describe('claim', () => {
     });
 
     it('should return 56% bonus hearts for self refer launch day', () => {
-      const hearts = new Claim(Date.now())
+      const hearts = new Claim(Utils.newState())
         .claimBtcAddress(100,
           null,
           '0x3f5CE5FBFe3E9af3971dD833D26bA9b5C936f0bE',
@@ -108,7 +109,7 @@ describe('claim', () => {
     });
 
     it('should return <100%  hearts for half-way day', () => {
-      const hearts = new Claim(Date.now() - (176 * 1000 * 86400))
+      const hearts = new Claim(Utils.newState(Date.now() - (176 * 1000 * 86400)))
         .claimBtcAddress(100,
           null,
           '0x3f5CE5FBFe3E9af3971dD833D26bA9b5C936f0bE',
@@ -127,7 +128,7 @@ describe('claim', () => {
     });
 
     it('should return <100% hearts for non-self refer launch day', () => {
-      const hearts = new Claim(Date.now() - (176 * 1000 * 86400))
+      const hearts = new Claim(Utils.newState(Date.now() - (176 * 1000 * 86400)))
         .claimBtcAddress(100,
           null,
           '0x3f5CE5FBFe3E9af3971dD833D26bA9b5C936f0bE',
@@ -148,7 +149,7 @@ describe('claim', () => {
     });
 
     it('should return <100% hearts for self refer launch day', () => {
-      const hearts = new Claim(Date.now() - (176 * 1000 * 86400))
+      const hearts = new Claim(Utils.newState(Date.now() - (176 * 1000 * 86400)))
         .claimBtcAddress(100,
           null,
           '0x3f5CE5FBFe3E9af3971dD833D26bA9b5C936f0bE',

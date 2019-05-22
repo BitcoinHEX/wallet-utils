@@ -6,7 +6,7 @@ class Utils {
       const asBig = BigInt(sharesHearts);
       return {
         dayStakeSharesTotal: asBig.shiftRight(128),
-        dayPayoutTotal: asBig.and(BigInt('0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF')),
+        dayPayoutTotal: asBig.and(BigInt('FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF', 16)),
       };
     });
   }

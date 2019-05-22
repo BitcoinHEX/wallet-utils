@@ -5,13 +5,16 @@ function noSuchMethod(method) {
 }
 
 class Dispatcher {
-  constructor(contractAddress, networkProvider, contractSimulator) {
-    const abi = [
-      'event ValueChanged(address indexed author, string oldValue, string newValue)',
-      'constructor(string value)',
-      'function getValue() view returns (string value)',
-      'function setValue(string value)',
-    ];
+  constructor(contractAddress, abi, networkProvider, contractSimulator) {
+    /*
+      Example format
+      const abi = [
+        'event ValueChanged(address indexed author, string oldValue, string newValue)',
+        'constructor(string value)',
+        'function getValue() view returns (string value)',
+        'function setValue(string value)',
+      ];
+    */
 
     this.provider = networkProvider;
 

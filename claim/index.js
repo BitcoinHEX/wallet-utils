@@ -1,5 +1,4 @@
 const ethers = require('ethers');
-const Token = require('../token');
 
 const CLAIM_REWARD_DAYS = 350;
 const HEARTS_PER_SATOSHI = 1e4;
@@ -18,8 +17,8 @@ function adjustSillyWhale(rawSatoshis) {
 }
 
 class Claim {
-  constructor(contractStartDateMillis) {
-    this.token = new Token(contractStartDateMillis);
+  constructor(contractState) {
+    this.contractState = contractState;
   }
 
   static getClaimStatement(ethAddress) {
@@ -39,7 +38,7 @@ class Claim {
     autoStakeDays, // not used
     referrerAddr, // address, present only
   ) {
-    const day = this.token.getCurrentDay();
+    const day = this.contractState.getCurrentDay();
 
     let adjSatoshis = adjustSillyWhale(rawSatoshis);
     const phaseDaysRemaining = CLAIM_REWARD_DAYS - day;
