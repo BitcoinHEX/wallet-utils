@@ -127,7 +127,7 @@ describe('claim', () => {
       assert.strict(ethers.utils.bigNumberify(549714).eq(hearts));
     });
 
-    it('should return <100% hearts for non-self refer launch day', () => {
+    it('should return <100% hearts for non-self refer half-way day', () => {
       const hearts = new Claim(Utils.newState(Date.now() - (176 * 1000 * 86400)))
         .claimBtcAddress(100,
           null,
@@ -148,7 +148,7 @@ describe('claim', () => {
       assert.strict(ethers.utils.bigNumberify(604685).eq(hearts));
     });
 
-    it('should return <100% hearts for self refer launch day', () => {
+    it('should return <100% hearts for self refer half-way day', () => {
       const hearts = new Claim(Utils.newState(Date.now() - (176 * 1000 * 86400)))
         .claimBtcAddress(100,
           null,

@@ -4,7 +4,7 @@ const TestUtils = require('./testUtilities');
 
 describe('Utils', () => {
   describe('processDailyRangeData', () => {
-    it('works', () => {
+    it('regenerates original values from packed values', () => {
       const data = TestUtils.buildRandomDailyData();
       const result = Utils.processDailyRangeData(data.map(x => x.combined));
 
@@ -15,4 +15,6 @@ describe('Utils', () => {
       }
     });
   });
+
+  // Need test for payout calculation functions
 });

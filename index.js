@@ -5,14 +5,16 @@ const Token = require('./token');
 const Stake = require('./stake');
 const Transform = require('./transform');
 const Dispatch = require('./dispatch');
+const Utils = require('./utils');
 
-class Utils {
+class HexClient {
   constructor(contractAddress, abi, contractStartDateMillis, network, networkProvider) {
     const contractState = new Contract(contractStartDateMillis);
     this.claim = new Claim(contractState);
     this.token = new Token(contractState);
     this.stake = new Stake(contractState);
     this.transform = new Transform(contractState);
+    this.utilities = Utils;
     const simulator = Object.assign({}, this.claim, this.token, this.stake, this.transform);
 
     const np = networkProvider || ethers.getDefaultProvider(network);
@@ -21,4 +23,4 @@ class Utils {
   }
 }
 
-module.exports = Utils;
+module.exports = HexClient;
