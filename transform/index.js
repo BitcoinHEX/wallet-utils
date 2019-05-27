@@ -1,4 +1,7 @@
-const transform = {
-};
+class Transform {
+  constructor(contractState) {
+    this.contractState = contractState;
+  }
+}
 
-module.exports = transform;
+module.exports = Transform;

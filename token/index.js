@@ -1,10 +1,7 @@
-const ethers = require('ethers');
+class Token {
+  constructor(contractState) {
+    this.contractState = contractState;
+  }
+}
 
-const token = contractStartDateMillis => ({
-  // getGlobalInfo: () => {}, Not useful or possible to simulate this?
-  getCurrentDay: () => Promise.resolve(ethers.utils.bigNumberify(
-    Math.floor(Math.abs(Date.now() - contractStartDateMillis) / (1000 * 86400)),
-  )),
-});
-
-module.exports = token;
+module.exports = Token;

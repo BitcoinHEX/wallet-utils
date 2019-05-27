@@ -1,34 +1,48 @@
 const ethers = require('ethers');
 
+function noSuchMethod(method) {
+  return () => `No such simulation method ${method} exists`;
+}
+
 class Dispatcher {
-  constructor(contractAddress, network, contractSimulator) {
-    const abi = [
-      'event ValueChanged(address indexed author, string oldValue, string newValue)',
-      'constructor(string value)',
-      'function getValue() view returns (string value)',
-      'function setValue(string value)',
-    ];
+  constructor(abi, contractSimulator, contractProvider, contractAddress, networkProvider) {
+    /*
+      Example format
+      const abi = [
+        'event ValueChanged(address indexed author, string oldValue, string newValue)',
+        'constructor(string value)',
+        'function getValue() view returns (string value)',
+        'function setValue(string value)',
+      ];
+    */
 
-    this.provider = ethers.getDefaultProvider(network);
-
-    this.contract = new ethers.Contract(contractAddress, abi, this.provider);
+    this.address = contractAddress;
+    this.provider = networkProvider;
+    this.interface = new ethers.utils.Interface(abi);
+    // Contract provider is a function that returns a contract - mostly a testing/mock utility
+    if (contractProvider) {
+      this.contractProvider = contractProvider;
+    } else {
+      this.contract = new ethers.Contract(contractAddress, abi, this.provider);
+    }
     this.simulator = contractSimulator;
   }
 
   buildProxy(method, args) {
-    const contractFunction = this.contract.interface.functions[method];
+    const contractFunction = this.interface.functions[method];
     let simFunction;
     let gasCost;
     if (contractFunction.type === 'call') {
       simFunction = this.provider.call;
       gasCost = () => Promise.resolve(ethers.utils.bigNumberify(0));
     } else {
-      simFunction = () => this.simulator[method](args); // ignore tx data, use raw args for ease
+      // ignore tx data, use raw args for ease
+      simFunction = () => (this.simulator[method] || noSuchMethod(method))(...args);
       gasCost = this.provider.estimateGas;
     }
 
     const tx = {
-      to: this.contract.address,
+      to: this.address,
       nonce: 0,
       gasLimit: 0,
       gasPrice: 0,
@@ -40,14 +54,16 @@ class Dispatcher {
       transaction: tx,
       getGasCost: () => gasCost(tx),
       simulate: () => simFunction(tx),
-      submit: wallet => this.contract.connect(wallet)[method](args),
+      submit: wallet => (this.contractProvider ? this.contractProvider()
+        : this.contract)
+        .connect(wallet)[method](...args),
     };
   }
 
   callConstant(method, args) {
     const contractFunction = this.contract.interface.functions[method];
     if (contractFunction.type !== 'call') {
-      return Promise.reject(new Error(`method ${method} is not \`call\` type.`));
+      return Promise.reject(new Error(`method ${method} is not 'call' type.`));
     }
 
     const tx = {
