@@ -5,21 +5,30 @@ const Token = require('./token');
 const Stake = require('./stake');
 const Transform = require('./transform');
 const Dispatch = require('./dispatch');
+const Api = require('./api');
 const Utils = require('./utils');
 
 class HexClient {
-  constructor(contractAddress, abi, contractStartDateMillis, network, networkProvider) {
-    const contractState = new Contract(contractStartDateMillis);
-    this.claim = new Claim(contractState);
-    this.token = new Token(contractState);
-    this.stake = new Stake(contractState);
-    this.transform = new Transform(contractState);
-    this.utilities = Utils;
-    const simulator = Object.assign({}, this.claim, this.token, this.stake, this.transform);
-
+  constructor(contractAddress,
+    abi,
+    simplifiedEvents,
+    simplifiedFunctions,
+    contractStartDateMillis,
+    contractStateProvider,
+    network,
+    networkProvider) {
+    const contractState = contractStateProvider || new Contract(contractStartDateMillis);
+    const claim = new Claim(contractState);
+    const token = new Token(contractState);
+    const stake = new Stake(contractState);
+    const transform = new Transform(contractState);
+    const simulator = Object.assign({}, claim, token, stake, transform);
     const np = networkProvider || ethers.getDefaultProvider(network);
-
+    // This is the real client API in my mind - whatever utilities, the raw dispatcher, and the
+    // simplified client API that wraps for convenience
+    this.utilities = Utils;
     this.dispatch = new Dispatch(contractAddress, abi, np, simulator);
+    this.simpleApi = new Api(this.dispatch, abi, simplifiedEvents, simplifiedFunctions);
   }
 }
 

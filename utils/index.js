@@ -143,6 +143,21 @@ class Utils {
     }
     return stakeReturn;
   }
+
+  static extractSimplifiedApi(abi, relevantEvents, relevantFunctions) {
+    const obj = { events: {}, functions: {} };
+    const eventRelevant = evtName => !relevantEvents || relevantEvents.indexOf(evtName) > -1;
+    const functionRelevant = fnName => !relevantFunctions || relevantFunctions.indexOf(fnName) > -1;
+    abi.map((item) => {
+      if (item.type && item.type === 'event' && eventRelevant(item.name)) {
+        obj.events[item.name] = { fields: item.inputs };
+      } else if (item.type && item.type === 'function' && functionRelevant(item.name)) {
+        obj.functions[item.name] = { inputs: item.inputs, outputs: item.outputs };
+      }
+      return null;
+    });
+    return obj;
+  }
 }
 
 module.exports = Utils;

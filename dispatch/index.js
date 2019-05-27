@@ -5,7 +5,7 @@ function noSuchMethod(method) {
 }
 
 class Dispatcher {
-  constructor(contractAddress, abi, networkProvider, contractSimulator) {
+  constructor(abi, contractSimulator, contractProvider, contractAddress, networkProvider) {
     /*
       Example format
       const abi = [
@@ -16,14 +16,20 @@ class Dispatcher {
       ];
     */
 
+    this.address = contractAddress;
     this.provider = networkProvider;
-
-    this.contract = new ethers.Contract(contractAddress, abi, this.provider);
+    this.interface = new ethers.utils.Interface(abi);
+    // Contract provider is a function that returns a contract - mostly a testing/mock utility
+    if (contractProvider) {
+      this.contractProvider = contractProvider;
+    } else {
+      this.contract = new ethers.Contract(contractAddress, abi, this.provider);
+    }
     this.simulator = contractSimulator;
   }
 
   buildProxy(method, args) {
-    const contractFunction = this.contract.interface.functions[method];
+    const contractFunction = this.interface.functions[method];
     let simFunction;
     let gasCost;
     if (contractFunction.type === 'call') {
@@ -36,7 +42,7 @@ class Dispatcher {
     }
 
     const tx = {
-      to: this.contract.address,
+      to: this.address,
       nonce: 0,
       gasLimit: 0,
       gasPrice: 0,
@@ -48,7 +54,9 @@ class Dispatcher {
       transaction: tx,
       getGasCost: () => gasCost(tx),
       simulate: () => simFunction(tx),
-      submit: wallet => this.contract.connect(wallet)[method](...args),
+      submit: wallet => (this.contractProvider ? this.contractProvider()
+        : this.contract)
+        .connect(wallet)[method](...args),
     };
   }
 
