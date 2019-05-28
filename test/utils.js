@@ -5,6 +5,21 @@ const Utils = require('../utils');
 const TestUtils = require('./testUtilities');
 
 describe('Utils', () => {
+  describe('buildAllTrueBitMask', () => {
+    it('produces FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF for 128 bits', () => {
+      assert.strict(Utils.buildAllTrueBitmask(128)
+        .toString(16)
+        .toUpperCase() === 'FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF');
+    });
+
+    it('produces FFFFFFFFFFFFFFFFFFFF for 80 bits', () => {
+      const mask = Utils.buildAllTrueBitmask(80)
+        .toString(16);
+      assert.strict(mask
+        .toUpperCase() === 'FFFFFFFFFFFFFFFFFFFF');
+    });
+  });
+
   describe('processDailyRangeData', () => {
     it('regenerates original values from packed values', () => {
       const data = TestUtils.buildRandomDailyData();
@@ -22,7 +37,6 @@ describe('Utils', () => {
     it('has 43 keys without filters', () => {
       const abi = JSON.parse(fs.readFileSync(path.resolve(__dirname, './HEX.abi.json'), 'utf8'));
       const converted = Utils.extractSimplifiedApi(abi);
-      console.log(converted);
       const numFunctions = Object.keys(converted.functions).reduce(sum => sum + 1, 0);
       const numEvents = Object.keys(converted.events).reduce(sum => sum + 1, 0);
       assert.strict(numFunctions === 33);
@@ -44,7 +58,6 @@ describe('Utils', () => {
       ];
 
       const converted = Utils.extractSimplifiedApi(abi, evts, fns);
-      console.log(converted);
       const numFunctions = Object.keys(converted.functions).reduce(sum => sum + 1, 0);
       const numEvents = Object.keys(converted.events).reduce(sum => sum + 1, 0);
       assert.strict(numFunctions === 8);

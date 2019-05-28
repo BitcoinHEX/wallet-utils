@@ -6,12 +6,22 @@ const EARLY_PENALTY_MIN_DAYS = 90;
 const bigZero = BigInt(0);
 
 class Utils {
+  static buildAllTrueBitmask(length) {
+    let result = bigZero;
+    for (let i = 0; i < length; i += 1) {
+      result = result.shiftLeft(1).add(1);
+    }
+    return result;
+  }
+
   static processDailyRangeData(data) {
-    return data.map((sharesHearts) => {
-      const asBig = BigInt(sharesHearts);
+    return data.map((satoshisSharesHearts) => {
+      const asBig = BigInt(satoshisSharesHearts);
+      const mask = Utils.buildAllTrueBitmask(80);
       return {
-        dayStakeSharesTotal: asBig.shiftRight(128),
-        dayPayoutTotal: asBig.and(BigInt('FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF', 16)),
+        dayStakeSharesTotal: asBig.shiftRight(80).and(mask),
+        dayPayoutTotal: asBig.and(mask),
+        dayUnclaimedSatoshisTotal: asBig.shiftRight(160).and(mask),
       };
     });
   }
