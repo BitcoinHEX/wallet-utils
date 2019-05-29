@@ -165,6 +165,24 @@
     "type": "function"
   },
   {
+    "constant": false,
+    "inputs": [
+      {
+        "name": "memberAddr",
+        "type": "address"
+      },
+      {
+        "name": "joinDay",
+        "type": "uint256"
+      }
+    ],
+    "name": "leaveXfLobby",
+    "outputs": [],
+    "payable": false,
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
     "constant": true,
     "inputs": [
       {
@@ -238,6 +256,24 @@
     ],
     "payable": false,
     "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": false,
+    "inputs": [
+      {
+        "name": "memberAddr",
+        "type": "address"
+      },
+      {
+        "name": "referrerAddr",
+        "type": "address"
+      }
+    ],
+    "name": "joinXfLobby",
+    "outputs": [],
+    "payable": true,
+    "stateMutability": "payable",
     "type": "function"
   },
   {
@@ -319,6 +355,15 @@
     "type": "function"
   },
   {
+    "constant": false,
+    "inputs": [],
+    "name": "flush",
+    "outputs": [],
+    "payable": false,
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
     "constant": true,
     "inputs": [
       {
@@ -338,12 +383,22 @@
     "type": "function"
   },
   {
-    "constant": false,
-    "inputs": [],
-    "name": "flushTrappedEth",
-    "outputs": [],
+    "constant": true,
+    "inputs": [
+      {
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "name": "xfLobby",
+    "outputs": [
+      {
+        "name": "",
+        "type": "uint256"
+      }
+    ],
     "payable": false,
-    "stateMutability": "nonpayable",
+    "stateMutability": "view",
     "type": "function"
   },
   {
@@ -428,6 +483,10 @@
       {
         "name": "dayStakeSharesTotal",
         "type": "uint80"
+      },
+      {
+        "name": "dayUnclaimedSatoshisTotal",
+        "type": "uint64"
       }
     ],
     "payable": false,
@@ -591,6 +650,37 @@
   },
   {
     "constant": true,
+    "inputs": [
+      {
+        "name": "",
+        "type": "uint256"
+      },
+      {
+        "name": "",
+        "type": "address"
+      },
+      {
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "name": "xfLobbyMembers",
+    "outputs": [
+      {
+        "name": "rawAmount",
+        "type": "uint96"
+      },
+      {
+        "name": "referrerAddr",
+        "type": "address"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": true,
     "inputs": [],
     "name": "globals",
     "outputs": [
@@ -629,33 +719,6 @@
       {
         "name": "claimedBtcAddrCount",
         "type": "uint32"
-      }
-    ],
-    "payable": false,
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "constant": true,
-    "inputs": [
-      {
-        "name": "stakeSharesParam",
-        "type": "uint256"
-      },
-      {
-        "name": "beginDay",
-        "type": "uint256"
-      },
-      {
-        "name": "endDay",
-        "type": "uint256"
-      }
-    ],
-    "name": "calcPayoutRewards",
-    "outputs": [
-      {
-        "name": "payout",
-        "type": "uint256"
       }
     ],
     "payable": false,
@@ -711,7 +774,7 @@
     "outputs": [
       {
         "name": "",
-        "type": "uint256[11]"
+        "type": "uint256[12]"
       }
     ],
     "payable": false,
@@ -778,6 +841,163 @@
     "payable": true,
     "stateMutability": "payable",
     "type": "fallback"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "name": "timestamp",
+        "type": "uint40"
+      },
+      {
+        "indexed": true,
+        "name": "memberAddr",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "name": "rawAmount",
+        "type": "uint256"
+      }
+    ],
+    "name": "JoinXfLobby",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "name": "timestamp",
+        "type": "uint40"
+      },
+      {
+        "indexed": true,
+        "name": "memberAddr",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "name": "rawAmount",
+        "type": "uint256"
+      }
+    ],
+    "name": "JoinXfLobbyReferredBySelf",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "name": "timestamp",
+        "type": "uint40"
+      },
+      {
+        "indexed": true,
+        "name": "memberAddr",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "name": "rawAmount",
+        "type": "uint256"
+      },
+      {
+        "indexed": true,
+        "name": "referrerAddr",
+        "type": "address"
+      }
+    ],
+    "name": "JoinXfLobbyReferredByOther",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "name": "timestamp",
+        "type": "uint40"
+      },
+      {
+        "indexed": true,
+        "name": "memberAddr",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "name": "joinDay",
+        "type": "uint16"
+      },
+      {
+        "indexed": false,
+        "name": "xfAmount",
+        "type": "uint256"
+      }
+    ],
+    "name": "LeaveXfLobby",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "name": "timestamp",
+        "type": "uint40"
+      },
+      {
+        "indexed": true,
+        "name": "memberAddr",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "name": "joinDay",
+        "type": "uint16"
+      },
+      {
+        "indexed": false,
+        "name": "xfAmount",
+        "type": "uint256"
+      }
+    ],
+    "name": "LeaveXfLobbyReferredBySelf",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "name": "timestamp",
+        "type": "uint40"
+      },
+      {
+        "indexed": true,
+        "name": "memberAddr",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "name": "joinDay",
+        "type": "uint16"
+      },
+      {
+        "indexed": false,
+        "name": "xfAmount",
+        "type": "uint256"
+      },
+      {
+        "indexed": true,
+        "name": "referrerAddr",
+        "type": "address"
+      }
+    ],
+    "name": "LeaveXfLobbyReferredByOther",
+    "type": "event"
   },
   {
     "anonymous": false,

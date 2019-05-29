@@ -6,13 +6,13 @@ const Api = require('../api');
 
 describe('api', () => {
   describe('convertAbi', () => {
-    it('has 43 keys without filters', () => {
+    it('has 52 keys without filters', () => {
       const abi = JSON.parse(fs.readFileSync(path.resolve(__dirname, './HEX.abi.json'), 'utf8'));
       const simpleApi = new Api(new Dispatch(abi, {}, () => ({}), '0x12345'), abi);
       const numFunctions = Object.keys(simpleApi.functions).reduce(sum => sum + 1, 0);
       const numEvents = Object.keys(simpleApi.events).reduce(sum => sum + 1, 0);
-      assert.strict(numFunctions === 33);
-      assert.strict(numEvents === 10);
+      assert.strict(numFunctions === 36);
+      assert.strict(numEvents === 16);
     });
 
     it('has 10 keys with filters', () => {
