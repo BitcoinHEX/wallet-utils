@@ -27,7 +27,7 @@ class HexClient {
     // This is the real client API in my mind - whatever utilities, the raw dispatcher, and the
     // simplified client API that wraps for convenience
     this.utilities = Utils;
-    this.dispatch = new Dispatch(contractAddress, abi, np, simulator);
+    this.dispatch = new Dispatch(abi, simulator, contractState, contractAddress, np);
     this.simpleApi = new Api(this.dispatch, abi, simplifiedEvents, simplifiedFunctions);
   }
 }

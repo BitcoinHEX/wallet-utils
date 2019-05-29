@@ -33,7 +33,7 @@ class Dispatcher {
     let simFunction;
     let gasCost;
     if (contractFunction.type === 'call') {
-      simFunction = this.provider.call;
+      simFunction = () => this.provider.call(...args);
       gasCost = () => Promise.resolve(ethers.utils.bigNumberify(0));
     } else {
       // ignore tx data, use raw args for ease
