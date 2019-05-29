@@ -19,12 +19,9 @@ class Dispatcher {
     this.address = contractAddress;
     this.provider = networkProvider;
     this.interface = new ethers.utils.Interface(abi);
-    // Contract provider is a function that returns a contract - mostly a testing/mock utility
-    if (contractProvider) {
-      this.contractProvider = contractProvider;
-    } else {
-      this.contract = new ethers.Contract(contractAddress, abi, this.provider);
-    }
+    // Contract provider is a user provided object - mostly a testing/mock utility
+    this.contract = contractProvider !== undefined ? contractProvider
+      : new ethers.Contract(contractAddress, abi, this.provider);
     this.simulator = contractSimulator;
   }
 
@@ -54,20 +51,18 @@ class Dispatcher {
       transaction: tx,
       getGasCost: () => gasCost(tx),
       simulate: () => simFunction(tx),
-      submit: wallet => (this.contractProvider ? this.contractProvider()
-        : this.contract)
-        .connect(wallet)[method](...args),
+      submit: wallet => this.contract.connect(wallet)[method](...args),
     };
   }
 
   callConstant(method, args) {
-    const contractFunction = this.contract.interface.functions[method];
+    const contractFunction = this.interface.functions[method];
     if (contractFunction.type !== 'call') {
       return Promise.reject(new Error(`method ${method} is not 'call' type.`));
     }
 
     const tx = {
-      to: this.contract.address,
+      to: this.address,
       nonce: 0,
       gasLimit: 0,
       gasPrice: 0,
