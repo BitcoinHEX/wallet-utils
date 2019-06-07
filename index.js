@@ -1,4 +1,5 @@
 const ethers = require('ethers');
+
 const Claim = require('./claim');
 const Contract = require('./contract');
 const Token = require('./token');
@@ -8,9 +9,10 @@ const Dispatch = require('./dispatch');
 const Api = require('./api');
 const Utils = require('./utils');
 
+const abi = require('./abi');
+
 class HexClient {
   constructor(contractAddress,
-    abi,
     simplifiedEvents,
     simplifiedFunctions,
     contractStartDateMillis,
