@@ -6,7 +6,8 @@
   "scripts": {
     "unitTest": "mocha",
     "lint": "eslint .",
-    "test": "npm run lint && npm run unitTest"
+    "test": "npm run lint && npm run unitTest",
+    "test-only": "npm run unitTest"
   },
   "private": true,
   "devDependencies": {

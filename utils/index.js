@@ -1,11 +1,31 @@
+const ethers = require('ethers');
 const BigInt = require('big-integer');
 
 const LATE_PENALTY_GRACE_DAYS = 14;
 const LATE_PENALTY_SCALE_DAYS = 700;
 const EARLY_PENALTY_MIN_DAYS = 90;
 const bigZero = BigInt(0);
+const CONTRACT_START_TIME = Date.now(); // to be filled with real?
 
 class Utils {
+  static getDailyPayoutData() {
+    return this.dailyPayoutData;
+  }
+
+  static setDailyPayoutData(newDailyPayoutData) {
+    this.dailyPayoutData = newDailyPayoutData;
+  }
+
+  static getCurrentDay() {
+    const now = Date.now();
+    if (now < CONTRACT_START_TIME) {
+      throw new Error('Current day earlier than contract launch');
+    }
+    return ethers.utils.bigNumberify(Math.floor(
+      Math.abs(now - CONTRACT_START_TIME) / (1000 * 86400),
+    ));
+  }
+
   static buildAllTrueBitmask(length) {
     let result = bigZero;
     for (let i = 0; i < length; i += 1) {
@@ -152,21 +172,6 @@ class Utils {
       }
     }
     return stakeReturn;
-  }
-
-  static extractSimplifiedApi(abi, relevantEvents, relevantFunctions) {
-    const obj = { events: {}, functions: {} };
-    const eventRelevant = evtName => !relevantEvents || relevantEvents.indexOf(evtName) > -1;
-    const functionRelevant = fnName => !relevantFunctions || relevantFunctions.indexOf(fnName) > -1;
-    abi.map((item) => {
-      if (item.type && item.type === 'event' && eventRelevant(item.name)) {
-        obj.events[item.name] = { fields: item.inputs };
-      } else if (item.type && item.type === 'function' && functionRelevant(item.name)) {
-        obj.functions[item.name] = { inputs: item.inputs, outputs: item.outputs };
-      }
-      return null;
-    });
-    return obj;
   }
 }
 

@@ -1,42 +1,17 @@
 const ethers = require('ethers');
 
-function noSuchMethod(method) {
-  return () => `No such simulation method ${method} exists`;
-}
-
 class Dispatcher {
-  constructor(abi, contractSimulator, contractProvider, contractAddress, networkProvider) {
-    /*
-      Example format
-      const abi = [
-        'event ValueChanged(address indexed author, string oldValue, string newValue)',
-        'constructor(string value)',
-        'function getValue() view returns (string value)',
-        'function setValue(string value)',
-      ];
-    */
-
+  constructor(abi, contractAddress, networkProvider, contractProvider) {
     this.address = contractAddress;
     this.provider = networkProvider;
     this.interface = new ethers.utils.Interface(abi);
-    // Contract provider is a user provided object - mostly a testing/mock utility
+    // Contract provider is an optional user provided object for testing/mock
     this.contract = contractProvider !== undefined ? contractProvider
       : new ethers.Contract(contractAddress, abi, this.provider);
-    this.simulator = contractSimulator;
   }
 
   buildProxy(method, args) {
     const contractFunction = this.interface.functions[method];
-    let simFunction;
-    let gasCost;
-    if (contractFunction.type === 'call') {
-      simFunction = () => this.provider.call(...args);
-      gasCost = () => Promise.resolve(ethers.utils.bigNumberify(0));
-    } else {
-      // ignore tx data, use raw args for ease
-      simFunction = () => (this.simulator[method] || noSuchMethod(method))(...args);
-      gasCost = this.provider.estimateGas;
-    }
 
     const tx = {
       to: this.address,
@@ -49,8 +24,6 @@ class Dispatcher {
     return {
       callData: args,
       transaction: tx,
-      getGasCost: () => gasCost(tx),
-      simulate: () => simFunction(tx),
       submit: wallet => this.contract.connect(wallet)[method](...args),
     };
   }
@@ -74,13 +47,6 @@ class Dispatcher {
 
   callActive(method, args, wallet) {
     this.buildProxy(method, args).submit(wallet);
-  }
-
-  simulateCall(method, args) {
-    // Use callConstant to simulate call
-    // https://github.com/ethereum/interfaces/issues/8
-    // https://ethereum.stackexchange.com/questions/765/what-is-the-difference-between-a-transaction-and-a-call
-    return this.buildProxy(method, args).simulate();
   }
 
   subscribe(event, callback) {

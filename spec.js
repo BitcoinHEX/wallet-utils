@@ -7,15 +7,17 @@ const spec = {
     getUnclaimed() {},
     getSignMessage() {},
     claim() {},
+    estimateClaim() {},
   },
   stake: {
     getStakes() {},
     startStake() {},
     endStake() {},
+    estimateReturn() {},
     emergencyUnstake() {},
   },
   transform: {
-    getTransformLobbys() {},
+    getTransformLobbies() {},
     enterTransFormLobby() {},
   },
 };

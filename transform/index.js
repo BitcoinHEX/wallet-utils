@@ -1,7 +1,7 @@
 class Transform {
-  constructor(contractState) {
-    this.contractState = contractState;
-  }
+  static getTransformLobbies() {}
+
+  static enterTransFormLobby() {}
 }
 
 module.exports = Transform;

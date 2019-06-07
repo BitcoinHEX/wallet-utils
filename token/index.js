@@ -1,7 +1,7 @@
 class Token {
-  constructor(contractState) {
-    this.contractState = contractState;
-  }
+  static balance() {}
+
+  static transfer() {}
 }
 
 module.exports = Token;

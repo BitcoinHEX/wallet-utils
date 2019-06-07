@@ -1,4 +1,5 @@
 const ethers = require('ethers');
+const Utils = require('../utils');
 
 const CLAIM_REWARD_DAYS = 350;
 const HEARTS_PER_SATOSHI = 1e4;
@@ -17,16 +18,19 @@ function adjustSillyWhale(rawSatoshis) {
 }
 
 class Claim {
-  constructor(contractState) {
-    this.contractState = contractState;
+  constructor(mockState) {
+    this.mockState = mockState;
   }
 
-  static getClaimStatement(ethAddress) {
+  static getUnclaimed() {
+
+  }
+
+  static getSignMessage(ethAddress) {
     return `Claim_HEX_to_${ethAddress}`;
   }
 
-  claimBtcAddress(
-    rawSatoshis,
+  static claim(/* rawSatoshis,
     proof, // UInt8Array not used
     claimToAddr, // address, present only
     pubKeyX, // UInt8Array not used
@@ -37,8 +41,17 @@ class Claim {
     s, // UInt8Array not used
     autoStakeDays, // not used
     referrerAddr, // address, present only
+    */
   ) {
-    const day = this.contractState.getCurrentDay();
+
+  }
+
+  estimateClaim(
+    rawSatoshis,
+    claimToAddr, // address, present only
+    referrerAddr,
+  ) {
+    const day = (this.mockState && this.mockState.getCurrentDay()) || Utils.getCurrentDay();
 
     let adjSatoshis = adjustSillyWhale(rawSatoshis);
     const phaseDaysRemaining = CLAIM_REWARD_DAYS - day;
