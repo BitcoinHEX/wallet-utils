@@ -13,15 +13,16 @@ class HexClient {
     network,
     networkProvider,
     contractStateProvider) {
-    const claim = new Claim();
-    const token = new Token();
-    const stake = new Stake();
-    const transform = new Transform();
-    Object.assign(this, claim, token, stake, transform);
     // Optional user provided network provider to mock the network for testing
     const np = networkProvider || ethers.getDefaultProvider(network);
-    this.utilities = Utils;
     this.dispatch = new Dispatch(abi, contractAddress, np, contractStateProvider);
+
+    const claim = new Claim(this.dispatch);
+    const token = new Token(this.dispatch);
+    const stake = new Stake(this.dispatch);
+    const transform = new Transform(this.dispatch);
+    Object.assign(this, claim, token, stake, transform);
+    this.utilities = Utils;
   }
 }
 

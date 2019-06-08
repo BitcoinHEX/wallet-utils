@@ -1,4 +1,4 @@
-const ethers = require('ethers');
+const { bigNumberify } = require('ethers/utils');
 const BigInt = require('big-integer');
 
 const LATE_PENALTY_GRACE_DAYS = 14;
@@ -21,7 +21,7 @@ class Utils {
     if (now < CONTRACT_START_TIME) {
       throw new Error('Current day earlier than contract launch');
     }
-    return ethers.utils.bigNumberify(Math.floor(
+    return bigNumberify(Math.floor(
       Math.abs(now - CONTRACT_START_TIME) / (1000 * 86400),
     ));
   }

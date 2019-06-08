@@ -1,25 +1,30 @@
-const ethers = require('ethers');
+const { bigNumberify } = require('ethers/utils');
 const Utils = require('../utils');
 
 const MIN_AUTO_STAKE_DAYS = 350;
-
-const bigZero = ethers.utils.bigNumberify(0);
+const bigZero = bigNumberify(0);
 
 class Stake {
+  constructor(dispatcher) {
+    this.dispatcher = dispatcher;
+  }
+
   static getStakes() {
     // read/return my stuff and push to store or... ?
   }
 
-  static startStake(/* newStakedHearts, newStakedDays */) {
-
+  startStake(newStakedHearts, newStakedDays) {
+    return this.dispatcher.buildProxy('startStake', [newStakedHearts, newStakedDays]);
   }
 
-  static endStake(/* stakeIndex, stakeIdParam */) {
-
+  endStake(stakeIndex, stakeIdParam) {
+    // bounds check on stake state
+    return this.dispatcher.buildProxy('endStake', [stakeIndex, stakeIdParam]);
   }
 
-  static emergencyUnstake(/* stakeIndex, stakeIdParam */) {
-
+  emergencyUnstake(stakeIndex, stakeIdParam) {
+    // Just do it or error if mature?
+    return this.dispatcher.buildProxy('endStake', [stakeIndex, stakeIdParam]);
   }
 
   estimateReturn(stakeIndex, stakeIdParam) {

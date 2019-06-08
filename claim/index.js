@@ -1,11 +1,14 @@
-const ethers = require('ethers');
+const { AddressZero } = require('ethers/constants');
+const { bigNumberify } = require('ethers/utils');
 const Utils = require('../utils');
 
 const CLAIM_REWARD_DAYS = 350;
 const HEARTS_PER_SATOSHI = 1e4;
+const MIN_AUTO_STAKE_DAYS = 350;
+
 
 function adjustSillyWhale(rawSatoshis) {
-  const asBig = ethers.utils.bigNumberify(rawSatoshis);
+  const asBig = bigNumberify(rawSatoshis);
   if (rawSatoshis < 1000e8) {
     /* For < 1,000 BTC: no penalty */
     return asBig;
@@ -18,7 +21,8 @@ function adjustSillyWhale(rawSatoshis) {
 }
 
 class Claim {
-  constructor(mockState) {
+  constructor(dispatcher, mockState) {
+    this.dispatcher = dispatcher;
     this.mockState = mockState;
   }
 
@@ -30,20 +34,19 @@ class Claim {
     return `Claim_HEX_to_${ethAddress}`;
   }
 
-  static claim(/* rawSatoshis,
-    proof, // UInt8Array not used
-    claimToAddr, // address, present only
-    pubKeyX, // UInt8Array not used
-    pubKeyY, // UInt8Array not used
-    addrType, // byte not used
-    v, // byte not used
-    r, // UInt8Array not used
-    s, // UInt8Array not used
-    autoStakeDays, // not used
-    referrerAddr, // address, present only
-    */
-  ) {
-
+  claim(utxo, statement, viaEthAddr, autoStakeDays, referrer) {
+    const { rawPubKey, signature } = statement;
+    return this.dispatcher.buildProxy('claimBtcAddress', [utxo.satoshis,
+      utxo.proof,
+      statement.claimToEthAddr,
+      rawPubKey.subarray(0, 32),
+      rawPubKey.subarray(32, 64),
+      statement.addrType,
+      signature.v,
+      signature.r,
+      signature.s,
+      autoStakeDays || MIN_AUTO_STAKE_DAYS,
+      referrer || AddressZero]);
   }
 
   estimateClaim(

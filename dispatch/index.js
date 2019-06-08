@@ -1,5 +1,9 @@
 const ethers = require('ethers');
 
+async function signer(contract, provider, addr) {
+  return contract.connect(provider.getSigner(addr));
+}
+
 class Dispatcher {
   constructor(abi, contractAddress, networkProvider, contractProvider) {
     this.address = contractAddress;
@@ -24,7 +28,7 @@ class Dispatcher {
     return {
       callData: args,
       transaction: tx,
-      submit: wallet => this.contract.connect(wallet)[method](...args),
+      submit: addr => signer(this.contract, this.provider, addr)[method](...args),
     };
   }
 
