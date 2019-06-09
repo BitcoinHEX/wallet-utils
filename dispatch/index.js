@@ -17,7 +17,7 @@ class Dispatcher {
   buildProxy(method, args) {
     const contractFunction = this.interface.functions[method];
 
-    const tx = {
+    const t = {
       to: this.address,
       nonce: 0,
       gasLimit: 0,
@@ -27,8 +27,12 @@ class Dispatcher {
 
     return {
       callData: args,
-      transaction: tx,
-      submit: addr => signer(this.contract, this.provider, addr)[method](...args),
+      transaction: t,
+      submit: async (addr) => {
+        const tx = await signer(this.contract, this.provider, addr)[method](...args);
+        const txRcpt = await tx.wait();
+        return txRcpt;
+      },
     };
   }
 
