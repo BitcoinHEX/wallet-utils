@@ -5,13 +5,21 @@ async function signer(contract, provider, addr) {
 }
 
 class Dispatcher {
-  constructor(abi, contractAddress, networkProvider, contractProvider) {
+  constructor(contractAddress, networkProvider, iface, contract) {
     this.address = contractAddress;
     this.provider = networkProvider;
-    this.interface = new ethers.utils.Interface(abi);
+    this.interface = contract ? contract.interface : iface;
     // Contract provider is an optional user provided object for testing/mock
-    this.contract = contractProvider !== undefined ? contractProvider
-      : new ethers.Contract(contractAddress, abi, this.provider);
+    this.contract = contract !== undefined ? contract
+      : new ethers.Contract(contractAddress, iface, this.provider);
+  }
+
+  async getLogs(filters) {
+    return this.provider.getLogs(filters);
+  }
+
+  async getBlock(n) {
+    return this.provider.getBlock(n);
   }
 
   buildProxy(method, args) {
@@ -36,29 +44,33 @@ class Dispatcher {
     };
   }
 
-  callConstant(method, args) {
+  async callConstant(method, args) {
     const contractFunction = this.interface.functions[method];
     if (contractFunction.type !== 'call') {
       return Promise.reject(new Error(`method ${method} is not 'call' type.`));
     }
 
-    const tx = {
-      to: this.address,
-      nonce: 0,
-      gasLimit: 0,
-      gasPrice: 0,
-      data: contractFunction.encode(args),
-    };
-
-    return this.provider.call(tx);
+    return this.contract[method](...args);
   }
 
-  callActive(method, args, wallet) {
-    this.buildProxy(method, args).submit(wallet);
+  callActive(method, args, addr) {
+    return this.buildProxy(method, args).submit(addr);
   }
 
   subscribe(event, callback) {
     this.contract.on(event, callback);
+  }
+
+  removeAllListeners(event) {
+    this.contract.removeAllListeners(event);
+  }
+
+  subscribeOnError(callback) {
+    this.provider.on('error', callback);
+  }
+
+  removeAllErrorListeners() {
+    this.provider.removeAllListeners('error');
   }
 }
 

@@ -1,5 +1,5 @@
-const ethers = require('ethers');
-const BigInt = require('big-integer');
+const { bigNumberify } = require('ethers/utils');
+const BN = require('bn.js');
 
 class MockContract {
   constructor(contractStartDateMillis) {
@@ -13,7 +13,7 @@ class MockContract {
     if (now < this.startTimeMillis) {
       throw new Error('Current day earlier than contract launch');
     }
-    return ethers.utils.bigNumberify(Math.floor(
+    return bigNumberify(Math.floor(
       Math.abs(now - this.startTimeMillis) / (1000 * 86400),
     ));
   }
@@ -57,7 +57,8 @@ class MockContract {
 
 
 function packSharesAndHearts(satoshis, shares, hearts) {
-  return satoshis.shiftLeft(80).or(shares).shiftLeft(80).or(hearts);
+  return new BN(satoshis.toString()).iushln(80).iuor(new BN(shares.toString())).iushln(80)
+    .iuor(new BN(hearts.toString()));
 }
 
 const { abi } = require('../abi');
@@ -79,13 +80,17 @@ const makeStake = (stakeId,
   isAutoStake,
 });
 
+function randBetween(l, h) {
+  return bigNumberify(Math.floor(Math.random() * (h - 1) + l).toString());
+}
+
 const buildRandomDailyData = () => {
   const size = Math.floor(Math.random() * 365);
   const data = [];
   for (let i = 0; i < size; i += 1) {
-    const satoshis = BigInt.randBetween(100000, 1000000);
-    const shares = BigInt.randBetween(10000000, 100000000);
-    const hearts = BigInt.randBetween(1000000, 10000000);
+    const satoshis = randBetween(100000, 1000000);
+    const shares = randBetween(10000000, 100000000);
+    const hearts = randBetween(1000000, 10000000);
     data.push({
       satoshis, shares, hearts, combined: packSharesAndHearts(satoshis, shares, hearts),
     });

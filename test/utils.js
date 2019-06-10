@@ -3,21 +3,6 @@ const Utils = require('../utils');
 const TestUtils = require('./testUtilities');
 
 describe('Utils', () => {
-  describe('buildAllTrueBitMask', () => {
-    it('produces FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF for 128 bits', () => {
-      assert.strict(Utils.buildAllTrueBitmask(128)
-        .toString(16)
-        .toUpperCase() === 'FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF');
-    });
-
-    it('produces FFFFFFFFFFFFFFFFFFFF for 80 bits', () => {
-      const mask = Utils.buildAllTrueBitmask(80)
-        .toString(16);
-      assert.strict(mask
-        .toUpperCase() === 'FFFFFFFFFFFFFFFFFFFF');
-    });
-  });
-
   describe('processDailyRangeData', () => {
     it('regenerates original values from packed values', () => {
       const data = TestUtils.buildRandomDailyData();
