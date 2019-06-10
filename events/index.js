@@ -13,19 +13,15 @@ function getOptionalAddr(addr, defaultAddr = null) {
 // }
 
 class Events {
-  constructor(addr) {
-    this.addr = addr;
-  }
-
-  commonFields(e, tx) {
+  static commonFields(e, tx, addr) {
     const a = e.args;
 
     const user = a.stakerAddr || a.claimToAddr || a.memberAddr;
     const referrer = getOptionalAddr(a.referrerAddr);
-    const sender = getOptionalAddr(a.senderAddr, this.addr);
+    const sender = getOptionalAddr(a.senderAddr, addr);
 
-    const isReferral = referrer && referrer !== this.addr;
-    const isAssist = sender === this.addr && sender !== user;
+    const isReferral = referrer && referrer !== addr;
+    const isAssist = sender === addr && sender !== user;
 
     const evt = {
       evtId: e.evtId,
@@ -38,8 +34,8 @@ class Events {
     };
   }
 
-  static convertClaimReferral(e, tx) {
-    const { isReferral } = this.commonFields(e, tx);
+  static convertClaimReferral(e, tx, addr) {
+    const { isReferral } = this.commonFields(e, tx, addr);
     return {
       evtId: e.evtId,
       txId: e.txId,
@@ -49,8 +45,8 @@ class Events {
     };
   }
 
-  static convertTransformReferral(e, tx) {
-    const { isReferral } = this.commonFields(e, tx);
+  static convertTransformReferral(e, tx, addr) {
+    const { isReferral } = this.commonFields(e, tx, addr);
     return {
       evtId: e.evtId,
       txid: e.txId,
