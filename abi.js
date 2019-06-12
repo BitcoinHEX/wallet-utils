@@ -1,4 +1,4 @@
-const abi = [
+const defaultAbi = [
   'string public constant name',
   'string public constant symbol',
   'uint8 public constant decimals',
@@ -47,4 +47,4 @@ const abi = [
   'function claimBtcAddress(uint256 rawSatoshis, bytes32[] calldata proof, address claimToAddr, bytes32 pubKeyX, bytes32 pubKeyY, uint8 addrType, uint8 v, bytes32 r, bytes32 s, uint256 autoStakeDays, address referrerAddr) returns (uint256)',
 ];
 
-module.exports = abi;
+module.exports = defaultAbi;
